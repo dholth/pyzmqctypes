@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# Copyright © 2011 Daniel Holth, Brian Granger
+# Copyright © 2011 Daniel Holth
+# 
+# Derived from original pyzmq © 2010 Brian Granger
 #
 # This file is part of pyzmq-ctypes
 #
