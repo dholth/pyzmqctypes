@@ -14,7 +14,7 @@ class CConfigure(object):
             libraries = ['zmq']
             )
     size_t = configure.SimpleType('size_t', c_int)
-
+    
 for cname in ['ZMQ_AFFINITY', 'ZMQ_DOWNSTREAM', 'EADDRINUSE',
     'EADDRNOTAVAIL', 'EAGAIN', 'ECONNREFUSED', 'EFAULT', 'EFSM',
     'EINPROGRESS', 'EINVAL', 'EMTHREAD', 'ENETDOWN', 'ENOBUFS',
@@ -30,6 +30,19 @@ for cname in ['ZMQ_AFFINITY', 'ZMQ_DOWNSTREAM', 'EADDRINUSE',
 
 info = configure.configure(CConfigure)
 globals().update(info)
+
+class ZMQError(Exception):
+    pass
+
+def _check_nonzero(result, func, arguments):
+    if result.value != 0:
+        raise ZMQError()
+    return result
+
+def _check_null(result, func, arguments):
+    if zmq_errno():
+        raise ZMQError()
+    return result
 
 libzmq = cdll.LoadLibrary("libzmq.so")
 
@@ -53,8 +66,13 @@ libzmq.zmq_strerror.argtypes = [c_int]
 
 # 0MQ infrastructure
 
+class Context(object):
+    def __init__(self, threads=1):                
+        self.ctx = zmq_init(threads) 
+
 libzmq.zmq_init.restype = c_void_p
 libzmq.zmq_init.argtypes = [c_int]
+libzmq.zmq_init.errcheck = _check_null
 
 libzmq.zmq_term.restype = c_int
 libzmq.zmq_term.argtypes = [c_void_p]
